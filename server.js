@@ -1,6 +1,9 @@
 
+// const { uuid } = require('crypto');
 const express = require('express');
+const uuid = require('./public/assets/helpers/uuid');
 const path = require('path');
+
 
 const PORT = process.env.PORT || 3001;
 
@@ -9,7 +12,7 @@ const app = express();
 //middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api', api);
+
 
 app.use(express.static('public'));
 
@@ -22,6 +25,42 @@ app.get('/', (req, res) =>
 app.get('/notes', (req, res) =>
   res.sendFile(path.join(__dirname, '/public/notes.html'))
 );
+
+// GET Route for json file
+app.get('/api/notes', (req, res) =>
+  res.sendFile(path.join(__dirname, '/db/db.json'))
+);
+
+//Post Route for db.json
+app.post('/api/notes', (req, res) => {
+    // Log that a POST request was received
+    console.info(`${req.method} request received to add a review`);
+  
+    // Destructuring assignment for the items in req.body
+    const { noteTitle, noteText } = req.body;
+    console.log(noteTitle)
+    console.log(noteText)
+
+    // If all the required properties are present
+    if (noteTitle && noteText) {
+    //Variable for the object we will save
+      const newNote = {
+        noteTitle,
+        noteText,
+        id: uuid(),
+      };
+
+      const response = {
+        status: 'success',
+        body: newNote,
+      };
+  
+      console.log(response);
+      res.status(201).json(response);
+    } else {
+      res.status(500).json('Error in posting review');
+    }
+  });
 
 // Wildcard returns the main index
 app.get('*', (req, res) =>
