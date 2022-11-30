@@ -1,8 +1,12 @@
 
-// const { uuid } = require('crypto');
 const express = require('express');
 const uuid = require('./public/assets/helpers/uuid');
 const path = require('path');
+const {
+  readFromFile,
+  readAndAppend,
+  writeToFile,
+} = require('./public/assets/helpers/fsUtils');
 
 
 const PORT = process.env.PORT || 3001;
@@ -37,16 +41,16 @@ app.post('/api/notes', (req, res) => {
     console.info(`${req.method} request received to add a review`);
   
     // Destructuring assignment for the items in req.body
-    const { noteTitle, noteText } = req.body;
-    console.log(noteTitle)
-    console.log(noteText)
+    const { title, text } = req.body;
+    console.log(title)
+    console.log(text)
 
     // If all the required properties are present
-    if (noteTitle && noteText) {
+    if (title && text) {
     //Variable for the object we will save
       const newNote = {
-        noteTitle,
-        noteText,
+        title,
+        text,
         id: uuid(),
       };
 
@@ -54,9 +58,11 @@ app.post('/api/notes', (req, res) => {
         status: 'success',
         body: newNote,
       };
-  
-      console.log(response);
-      res.status(201).json(response);
+     
+      readAndAppend(newNote, './db/db.json');
+    res.json(`Tip added successfully 🚀`);
+     
+    console.log(response);
     } else {
       res.status(500).json('Error in posting review');
     }
